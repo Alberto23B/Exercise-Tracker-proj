@@ -18,34 +18,18 @@ mongoose.connect(
   { useNewUrlParser: true, useUnifiedTopology: true },
 );
 
-
-const ExerciseSchema = new mongoose.Schema({
-  username: String,
-  description: String,
-  duration: Number,
-  date: String,
-  // _id: String,
-})
-let Exercise = mongoose.model("Exercise", ExerciseSchema);
-
-
 const UserSchema = new mongoose.Schema({
   username: String,
-  count: Number
+  count: Number,
+  log: [
+    {
+      description: String,
+      duration: Number,
+      date: String
+    }
+  ]
 })
 let User = mongoose.model("User", UserSchema);
-
-const LogSchema = new mongoose.Schema({
-  username: String,
-  count: Number,
-  // _id: String,
-  log : [{
-    descritpion: String,
-    duration: Number,
-    date: String
-  }]
-})
-let Log = mongoose.model("Log", LogSchema);
 
 app.post("/api/users", async function (req, res) {
   const usrnm = req.body.username;
