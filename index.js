@@ -35,7 +35,9 @@ app.post("/api/users", async function (req, res) {
   const usrnm = req.body.username;
   try {
     const user = new User({
-      username : usrnm
+      username : usrnm,
+      count : 0,
+      log: []
     });
     await user.save()
     const exists = await User.findOne({ username : usrnm });
@@ -47,37 +49,45 @@ app.post("/api/users", async function (req, res) {
 })
 
 
-// app.post("/api/users/:_id/exercises", async function (req, res) {
-//   const searchId = req.params._id;
-//   const desc = req.body.description;
-//   const dur = req.body.duration;
-//   let dat;
-//   if (req.body.date !== "") {
-//     dat = new Date(req.body.date); 
-//   } else {
-//     dat = new Date;
-//   }
-//   const formatDate = dat.toDateString()
-//   try {
-//     const selected = await User.findById(searchId);
-//     const exercise = new Exercise({
-//       username : selected.username,
-//       description: desc,
-//       duration: dur,
-//       date : formatDate
-//     })
-//     console.log(selected._id);
-//     await exercise.save();
-//     res.json({username: exercise.username, 
-//               description: exercise.description, 
-//               duration: exercise.duration, 
-//               date: exercise.date,
-//              _id: exercise._id });
-//     } catch (err) {
-//     console.log(err);
-//     res.json({err : "error"});
-//   }
-// })
+app.post("/api/users/:_id/exercises", async function (req, res) {
+   const searchId = req.params._id;
+   const desc = req.body.description;
+   const dur = Number(req.body.duration);
+   let dat;
+   if (req.body.date !== "") {
+     dat = new Date(req.body.date); 
+   } else {
+     dat = new Date;
+   }
+   const formatDate = dat.toDateString() 
+   try {
+    const selected = 
+    await User.findByIdAndUpdate(
+      {_id : searchId},
+      {
+        $inc: {count : + 1},
+        $push: { 
+          log: {
+          description : desc,
+          duration: dur,
+          date: formatDate
+          }
+        },
+    }, 
+      {new : true})
+      const modified = await User.findById(searchId)
+      // const count = modified.count;
+    res.json({
+      "_id" : modified._id, 
+      "username" : modified.username, 
+      "date" : formatDate,
+      "duration" : dur,
+      "description" : desc
+    })
+   } catch (err) {
+    console.error(err);
+   }
+})
 
 
 
