@@ -76,7 +76,6 @@ app.post("/api/users/:_id/exercises", async function (req, res) {
     }, 
       {new : true})
       const modified = await User.findById(searchId)
-      // const count = modified.count;
     res.json({
       "_id" : modified._id, 
       "username" : modified.username, 
@@ -89,7 +88,42 @@ app.post("/api/users/:_id/exercises", async function (req, res) {
    }
 })
 
+// get a list of all users (an ARRAY)
+app.get("/api/users", async function (req, res) {
+  const userList = await User.find().select(["username", "_id"]);
+  res.json(userList);
+}); 
 
+app.get("/api/users/:_id/logs", async function (req, res) {
+  console.log(req.query);
+  console.log(req.params);
+  let {from, to, limit} = req.query;
+  const searchId = req.params._id
+  try {
+    let user = await User.findById(searchId).select(["_id", "username", "count", "log.description", "log.duration", "log.date"]);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    res.json(user);
+    // if (from) {
+    //    const formatFrom = new Date(from);
+    //    const dateFrom = Date.parse(formatFrom);
+    //    console.log(dateFrom);
+    //    let logDateFrom = user.log.date;
+    //    console.log(logDateFrom);
+    //    res.json({test: "testing"})
+    // }
+    // if (to) {
+    //   const formatTo = new Date(to)
+    // }
+    // if (limit) {
+
+    // }
+  } catch (err) {
+    res.status(404).json({ error: "User not found" });
+  }
+
+})
 
 
 
