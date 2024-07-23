@@ -95,8 +95,6 @@ app.get("/api/users", async function (req, res) {
 }); 
 
 app.get("/api/users/:_id/logs", async function (req, res) {
-  console.log(req.query);
-  console.log(req.params);
   let {from, to, limit} = req.query;
   const searchId = req.params._id
   try {
@@ -104,15 +102,29 @@ app.get("/api/users/:_id/logs", async function (req, res) {
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-    res.json(user);
-    // if (from) {
-    //    const formatFrom = new Date(from);
-    //    const dateFrom = Date.parse(formatFrom);
-    //    console.log(dateFrom);
-    //    let logDateFrom = user.log.date;
-    //    console.log(logDateFrom);
-    //    res.json({test: "testing"})
-    // }
+    let logs = user.log;
+    let customCount = 0;
+    if (from) {
+       const formatFrom = new Date(from);
+       logs = logs.filter(function (log) {
+        if (new Date(log.date) >= formatFrom) {
+          customCount++;
+          let dat = new Date(log.date)
+          let correctDate = dat.toDateString();
+          log.date = correctDate;
+          return correctDate, true;
+        }
+       })
+      //  const dateFrom = Date.parse(formatFrom);
+      //  let logDateFrom = user.log.date;
+       //console.log(logDateFrom);
+       res.json({
+        "_id" : user._id,
+        "username": user.username,
+        "count": customCount,
+        "log" : logs
+      })
+    }
     // if (to) {
     //   const formatTo = new Date(to)
     // }
