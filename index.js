@@ -111,10 +111,7 @@ app.get("/api/users/:_id/logs", async function (req, res) {
        logs = logs.filter(function (log) {
         if (new Date(log.date) >= formatFrom) {
           customCount++;
-          // let dat = new Date(log.date);
-          // let correctDate = dat.toDateString();
-          // log.date = correctDate;
-          return true; // correctDate, 
+          return true;  
         }
        })
     } else {
@@ -126,10 +123,7 @@ app.get("/api/users/:_id/logs", async function (req, res) {
       logs = logs.filter(function (log) {
       if (new Date(log.date) <= formatTo) {
         customCount++;
-        // dat = new Date(log.date);
-        // correctDate = dat.toDateString();
-        // log.date = correctDate;
-        return true //correctDate, 
+        return true 
       } else {
         customCount = logs.length;
       } 
@@ -162,11 +156,6 @@ app.get("/api/users/:_id/logs", async function (req, res) {
                date: new Date(log.date).toDateString()}
       })
     }
-    // const formattedLogs = (copyLogs.length > 0 ? copyLogs : logs).map(log => ({
-    //   description: log.description,
-    //   duration: log.duration,
-    //   date: new Date(log.date).toDateString()
-    // }));
 
     res.json({
         "_id" : user._id,
