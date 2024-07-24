@@ -95,7 +95,7 @@ app.get("/api/users", async function (req, res) {
 }); 
 
 app.get("/api/users/:_id/logs", async function (req, res) {
-  let {from, to, limit} = req.query;
+  let {from, to, limit} = (req.query) ? req.query : false;
   const searchId = req.params._id
   try {
     let user = await User.findById(searchId).select(["_id", "username", "count", "log.description", "log.duration", "log.date"]);
@@ -104,34 +104,59 @@ app.get("/api/users/:_id/logs", async function (req, res) {
     }
     let logs = user.log;
     let customCount = 0;
+    
     if (from) {
        const formatFrom = new Date(from);
        logs = logs.filter(function (log) {
         if (new Date(log.date) >= formatFrom) {
           customCount++;
-          let dat = new Date(log.date)
+          let dat = new Date(log.date);
           let correctDate = dat.toDateString();
           log.date = correctDate;
           return correctDate, true;
         }
        })
-      //  const dateFrom = Date.parse(formatFrom);
-      //  let logDateFrom = user.log.date;
-       //console.log(logDateFrom);
-       res.json({
+    } else {
+      customCount = logs.length;
+    }
+    if (to) {
+      customCount = 0;
+      const formatTo = new Date(to);
+      logs = logs.filter(function (log) {
+      if (new Date(log.date) <= formatTo) {
+        customCount++;
+        dat = new Date(log.date);
+        correctDate = dat.toDateString();
+        log.date = correctDate;
+        return correctDate, true
+      } else {
+        customCount = logs.length;
+      } 
+      }) 
+    };
+    let copyLogs = [];
+    if (limit && logs.length >= limit) {
+      let i = 0;
+      logs.filter(() => {
+        if (i < limit) {
+          copyLogs.push(logs[i]);
+          i++;
+        } 
+      })
+      customCount = i;
+    } else {
+      customCount = logs.length;
+    }
+
+    console.log(copyLogs);
+    res.json({
         "_id" : user._id,
         "username": user.username,
         "count": customCount,
-        "log" : logs
+        "log" : copyLogs.length > 0 ? copyLogs : logs 
       })
-    }
-    // if (to) {
-    //   const formatTo = new Date(to)
-    // }
-    // if (limit) {
-
-    // }
   } catch (err) {
+    console.log(err);
     res.status(404).json({ error: "User not found" });
   }
 
