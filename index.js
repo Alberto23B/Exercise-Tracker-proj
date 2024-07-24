@@ -25,7 +25,7 @@ const UserSchema = new mongoose.Schema({
     {
       description: String,
       duration: Number,
-      date: String
+      date: Date
     }
   ]
 })
@@ -43,7 +43,7 @@ app.post("/api/users", async function (req, res) {
     const exists = await User.findOne({ username : usrnm });
     res.json({"username" : exists.username, "_id" : exists._id})
   } catch (err) {
-    console.log(err)
+    console.error(err)
     res.json({err : "Error"});
   }
 })
@@ -51,15 +51,16 @@ app.post("/api/users", async function (req, res) {
 
 app.post("/api/users/:_id/exercises", async function (req, res) {
    const searchId = req.params._id;
+   const regex = /^[^a-zA-Z]*$/
    const desc = req.body.description;
    const dur = Number(req.body.duration);
    let dat;
-   if (req.body.date !== "") {
-     dat = new Date(req.body.date); 
+   if (req.body.date !== "" && regex.test(req.body.date)) {
+     dat = new Date(req.body.date);
    } else {
-     dat = new Date;
+     dat = new Date; 
    }
-   const formatDate = dat.toDateString() 
+   const formatDate = dat.toDateString()
    try {
     const selected = 
     await User.findByIdAndUpdate(
@@ -110,10 +111,10 @@ app.get("/api/users/:_id/logs", async function (req, res) {
        logs = logs.filter(function (log) {
         if (new Date(log.date) >= formatFrom) {
           customCount++;
-          let dat = new Date(log.date);
-          let correctDate = dat.toDateString();
-          log.date = correctDate;
-          return correctDate, true;
+          // let dat = new Date(log.date);
+          // let correctDate = dat.toDateString();
+          // log.date = correctDate;
+          return true; // correctDate, 
         }
        })
     } else {
@@ -125,10 +126,10 @@ app.get("/api/users/:_id/logs", async function (req, res) {
       logs = logs.filter(function (log) {
       if (new Date(log.date) <= formatTo) {
         customCount++;
-        dat = new Date(log.date);
-        correctDate = dat.toDateString();
-        log.date = correctDate;
-        return correctDate, true
+        // dat = new Date(log.date);
+        // correctDate = dat.toDateString();
+        // log.date = correctDate;
+        return true //correctDate, 
       } else {
         customCount = logs.length;
       } 
@@ -147,16 +148,34 @@ app.get("/api/users/:_id/logs", async function (req, res) {
     } else {
       customCount = logs.length;
     }
+    let formattedLogs;
+    if (copyLogs.length > 0) {
+      formattedLogs = copyLogs.map( function (log) {
+        return {description: log.description,
+               duration: log.duration,
+               date: new Date(log.date).toDateString()}
+      })
+    } else {
+      formattedLogs = logs.map( function (log) {
+        return {description: log.description,
+               duration: log.duration,
+               date: new Date(log.date).toDateString()}
+      })
+    }
+    // const formattedLogs = (copyLogs.length > 0 ? copyLogs : logs).map(log => ({
+    //   description: log.description,
+    //   duration: log.duration,
+    //   date: new Date(log.date).toDateString()
+    // }));
 
-    console.log(copyLogs);
     res.json({
         "_id" : user._id,
         "username": user.username,
         "count": customCount,
-        "log" : copyLogs.length > 0 ? copyLogs : logs 
+        "log" : formattedLogs
       })
   } catch (err) {
-    console.log(err);
+    console.error(err);
     res.status(404).json({ error: "User not found" });
   }
 
