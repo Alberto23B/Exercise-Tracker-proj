@@ -25,6 +25,14 @@
         <input id="date" type="text" name="date" placeholder="date (yyyy-mm-dd)" />
         <input type="submit" value="Submit" />
       </form>
+      <form action="/api/users/:_id/logs" id="query-form" method="get">
+        <h2>Lookup Exercise Logs</h2>
+        <input id="sId" name="searchId" type="text" />
+        <input id="fDate" name="from" type="date" />
+        <input id="tDate" name="to" type="date" />
+        <input id="lim" name="limit" type="number" />
+        <input type="submit" value="Submit" />
+      </form>
       <p>
         <strong>GET user's exercise log: </strong>
         <code>GET /api/users/:_id/logs?[from][&amp;to][&amp;limit]</code>

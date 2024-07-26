@@ -98,8 +98,8 @@ app.get("/api/users", async function (req, res) {
 }); 
 
 app.get("/api/users/:_id/logs", async function (req, res) {
-  let {from, to, limit} = (req.query) ? req.query : false;
-  const searchId = req.params._id
+  console.log(req.query);
+  let {searchId, from, to, limit} = (req.query) ? req.query : false;
   try {
     let user = await User.findById(searchId).select(["_id", "username", "count", "log.description", "log.duration", "log.date"]);
     if (!user) {
